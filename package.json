@@ -11,6 +11,7 @@
   "engines": {
     "node": ">=0.8.0"
   },
+  "main": "tmp.js",
   "dependencies": {},
   "repository": {
     "type": "git",
