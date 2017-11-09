@@ -1,9 +1,3 @@
-/*
-  html2canvas 0.4.1 <http://html2canvas.hertzen.com>
-  Copyright (c) 2013 Niklas von Hertzen
-
-  Released under MIT License
-*/
 
 (function(window, document, undefined){
 
@@ -1714,9 +1708,19 @@ _html2canvas.Parse = function (images, options, cb) {
     brh = borderRadius[2][0],
     brv = borderRadius[2][1],
     blh = borderRadius[3][0],
-    blv = borderRadius[3][1],
+    blv = borderRadius[3][1];
 
-    topWidth = width - trh,
+    var halfHeight = Math.floor(height / 2);
+    tlh = tlh > halfHeight ? halfHeight : tlh;
+    tlv = tlv > halfHeight ? halfHeight : tlv;
+    trh = trh > halfHeight ? halfHeight : trh;
+    trv = trv > halfHeight ? halfHeight : trv;
+    brh = brh > halfHeight ? halfHeight : brh;
+    brv = brv > halfHeight ? halfHeight : brv;
+    blh = blh > halfHeight ? halfHeight : blh;
+    blv = blv > halfHeight ? halfHeight : blv;
+
+    var topWidth = width - trh,
     rightHeight = height - brv,
     bottomWidth = width - brh,
     leftHeight = height - blv;
@@ -2947,11 +2951,13 @@ _html2canvas.Renderer.Canvas = function(options) {
     newCanvas,
     bounds,
     fstyle,
-    zStack = parsedData.stack;
+    zStack = parsedData.stack,
+    devicePixelRatio = (window.devicePixelRatio && window.devicePixelRatio > 1) ? window.devicePixelRatio : 1;
 
-    canvas.width = canvas.style.width =  options.width || zStack.ctx.width;
-    canvas.height = canvas.style.height = options.height || zStack.ctx.height;
+    canvas.width = canvas.style.width =  options.width || zStack.ctx.width * devicePixelRatio;
+    canvas.height = canvas.style.height = options.height || zStack.ctx.height * devicePixelRatio;
 
+    ctx.scale(devicePixelRatio, devicePixelRatio);
     fstyle = ctx.fillStyle;
     ctx.fillStyle = (Util.isTransparent(parsedData.backgroundColor) && options.background !== undefined) ? options.background : parsedData.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2989,11 +2995,13 @@ _html2canvas.Renderer.Canvas = function(options) {
         // crop image to the bounds of selected (single) element
         bounds = _html2canvas.Util.Bounds(options.elements[0]);
         newCanvas = document.createElement('canvas');
-        newCanvas.width = Math.ceil(bounds.width);
-        newCanvas.height = Math.ceil(bounds.height);
+        newCanvas.width = Math.ceil(bounds.width * devicePixelRatio);
+        newCanvas.height = Math.ceil(bounds.height * devicePixelRatio);
         ctx = newCanvas.getContext("2d");
 
-        ctx.drawImage(canvas, bounds.left, bounds.top, bounds.width, bounds.height, 0, 0, bounds.width, bounds.height);
+		var imgData = canvas.getContext("2d").getImageData(bounds.left * devicePixelRatio, bounds.top * devicePixelRatio, bounds.width * devicePixelRatio, bounds.height * devicePixelRatio);
+		ctx.putImageData(imgData, 0, 0);
+
         canvas = null;
         return newCanvas;
       }
@@ -3002,4 +3010,5 @@ _html2canvas.Renderer.Canvas = function(options) {
     return canvas;
   };
 };
+
 })(window,document);
